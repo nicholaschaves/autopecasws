@@ -20,13 +20,13 @@ import br.com.autopecas.veiculos.model.Usuario;
 import br.com.autopecas.veiculos.repository.UsuarioRepository;
 
 @RestController
-@RequestMapping(value = "/user")
+@RequestMapping(value = "/usuario")
 public class UsuarioController {
 
 	@Autowired
 	UsuarioRepository usuarioRepository;
 
-	@GetMapping("/listarTodos")
+	@GetMapping("/listar")
 	public ResponseEntity<List<Usuario>> listarUsuarios() {
 
 		List<Usuario> lista = new ArrayList<Usuario>();
@@ -45,7 +45,7 @@ public class UsuarioController {
 
 	}
 
-	@PostMapping("/novoUsuario")
+	@PostMapping("/novo")
 	public ResponseEntity<Usuario> criarUsuario(@RequestBody Usuario usuario) {
 		try {
 
@@ -57,7 +57,7 @@ public class UsuarioController {
 		}
 	}
 
-	@GetMapping("/{id}")
+	@GetMapping("/listarPorId/{id}")
 	public ResponseEntity<Usuario> consultarPorId(@PathVariable(value = "id") long id) {
 
 		Optional<Usuario> usuario = usuarioRepository.findById(id);
@@ -75,7 +75,7 @@ public class UsuarioController {
 
 	}
 
-	@PutMapping("/alterarUsuario/{id}")
+	@PutMapping("/alterar/{id}")
 	public ResponseEntity<Usuario> updateUsuario(@PathVariable("id") long id, @RequestBody Usuario usuario) {
 
 		Optional<Usuario> usuarioData = usuarioRepository.findById(id);
@@ -92,7 +92,7 @@ public class UsuarioController {
 
 	}
 	
-	@DeleteMapping("/excluirUsuario/{id}")
+	@DeleteMapping("/excluir/{id}")
 	public ResponseEntity<HttpStatus> deleteUsuario(@PathVariable("id") long id) {
 	  try {
 		  usuarioRepository.deleteById(id);

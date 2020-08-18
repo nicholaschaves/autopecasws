@@ -21,13 +21,13 @@ import br.com.autopecas.veiculos.model.Veiculo;
 import br.com.autopecas.veiculos.repository.VeiculoRepository;
 
 @RestController
-@RequestMapping(value = "/api")
+@RequestMapping(value = "/veiculo")
 public class VeiculoController {
 
 	@Autowired
 	VeiculoRepository veiculorepository;
 
-	@GetMapping("/veiculos")
+	@GetMapping("/listar")
 	public ResponseEntity<List<Veiculo>> findAllVeiculos(@RequestParam(required = false) String modelo) {
 
 		try {
@@ -48,7 +48,7 @@ public class VeiculoController {
 
 	}
 	
-	@PostMapping("/novoveiculo")
+	@PostMapping("/novo")
 	public ResponseEntity<Veiculo> createVeiculo(@RequestBody Veiculo veiculo){
 		try {
 			
@@ -60,7 +60,7 @@ public class VeiculoController {
 		}
 	}
 	
-	@PutMapping("/veiculos/{id}")
+	@PutMapping("/alterar/{id}")
 	public ResponseEntity<Veiculo> updateVeiculo(@PathVariable("id") String id, @RequestBody Veiculo veiculo){
 		
 		Optional<Veiculo> veiculoData = veiculorepository.findById(id);
@@ -79,7 +79,7 @@ public class VeiculoController {
 		
 	}
 	
-	@DeleteMapping("/veiculos/{id}")
+	@DeleteMapping("/deletar/{id}")
 	public ResponseEntity<HttpStatus> deleteVeiculo(@PathVariable("id") String id) {
 	  try {
 		  veiculorepository.deleteById(id);
@@ -89,7 +89,7 @@ public class VeiculoController {
 	  }
 	}
 	
-	@PostMapping("/find")
+	@PostMapping("/listarPorCampo")
 	public ResponseEntity<List<Veiculo>> findVeiculoByPlaca(@RequestBody Veiculo veiculo){
 		try {
 			
