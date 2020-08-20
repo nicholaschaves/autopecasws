@@ -16,8 +16,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.autopecas.veiculos.enuns.ECargoTipo;
 import br.com.autopecas.veiculos.model.Usuario;
 import br.com.autopecas.veiculos.repository.UsuarioRepository;
+import br.com.autopecas.veiculos.repository.UsuarioRepositoryImpl;
 
 @RestController
 @RequestMapping(value = "/usuario")
@@ -25,6 +27,9 @@ public class UsuarioController {
 
 	@Autowired
 	UsuarioRepository usuarioRepository;
+	
+	@Autowired
+	UsuarioRepositoryImpl usuarioRepoImpl;
 
 	@GetMapping("/listar")
 	public ResponseEntity<List<Usuario>> listarUsuarios() {
@@ -91,15 +96,63 @@ public class UsuarioController {
 		}
 
 	}
-	
+
 	@DeleteMapping("/excluir/{id}")
 	public ResponseEntity<HttpStatus> deleteUsuario(@PathVariable("id") long id) {
-	  try {
-		  usuarioRepository.deleteById(id);
-	    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-	  } catch (Exception e) {
-	    return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-	  }
+		try {
+			usuarioRepository.deleteById(id);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@GetMapping("/{cargo}")
+	public ResponseEntity<List<Usuario>> getSpecificUsuarioByCargo(@PathVariable("cargo") String cargo) {
+
+		List<Usuario> lista = new ArrayList<Usuario>();
+
+		usuarioRepository.findBySpecificCargo(cargo).forEach(lista::add);
+
+		return new ResponseEntity<>(lista, HttpStatus.OK);
+
+	}
+
+	@PostMapping("/find")
+	public ResponseEntity<List<Usuario>> find(@RequestBody Usuario usuario) {
+		try {
+
+			List<Usuario> lista = new ArrayList<Usuario>();
+
+//			if (usuario.getCpf() != null) {
+//				Usuario _usuario = new Usuario();
+//
+//				_usuario = usuarioRepository.findByCpf(usuario.getCpf());
+//				lista.add(_usuario);
+//			}
+//
+//			if (usuario.getCargo() != null) {
+//				List<Usuario> listaTemp = new ArrayList<Usuario>();
+//
+//				listaTemp = usuarioRepository.findBySpecificCargo(usuario.getCargo());
+//				listaTemp.forEach(lista::add);
+//			}
+//
+//			if (usuario.getNome() != null) {
+//				List<Usuario> listaTemp2 = new ArrayList<Usuario>();
+//
+//				listaTemp2 = usuarioRepository.findBySpecificName(usuario.getNome());
+//				listaTemp2.forEach(lista::add);
+//			}
+			
+			lista = usuarioRepoImpl.findByFiltro(usuario);
+			
+
+			return new ResponseEntity<>(lista, HttpStatus.CREATED);
+
+		} catch (Exception e) {
+			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 }
