@@ -1,6 +1,7 @@
 package br.com.autopecas.veiculos.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -20,6 +21,12 @@ public class Usuario implements Serializable {
 	private String nome;
 	private String cpf;
 	private String cargo;
+	private Date dtCadastro;
+	private Integer perfil;
+	private String username;
+	private String senha;
+	
+	
 	public long getId() {
 		return id;
 	}
@@ -43,6 +50,30 @@ public class Usuario implements Serializable {
 	}
 	public void setCargo(String cargo) {
 		this.cargo = cargo;
+	}
+	public Date getDtCadastro() {
+		return dtCadastro;
+	}
+	public void setDtCadastro(Date dtCadastro) {
+		this.dtCadastro = dtCadastro;
+	}
+	public Integer getPerfil() {
+		return perfil;
+	}
+	public void setPerfil(Integer perfil) {
+		this.perfil = perfil;
+	}
+	public String getUsername() {
+		return username;
+	}
+	public void setUsername(String username) {
+		this.username = username;
+	}
+	public String getSenha() {
+		return senha;
+	}
+	public void setSenha(String senha) {
+		this.senha = senha;
 	}
 
 	

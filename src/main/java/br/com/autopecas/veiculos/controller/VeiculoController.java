@@ -3,6 +3,7 @@ package br.com.autopecas.veiculos.controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -94,6 +95,11 @@ public class VeiculoController {
 		try {
 			
 			List<Veiculo> veiculos = new ArrayList<Veiculo>();
+			List<Veiculo> veiculosFormatted = new ArrayList<Veiculo>();
+			
+			if(veiculo.getPlaca() == null && veiculo.getModelo() == null && veiculo.getMarca() == null) {
+				veiculos = veiculorepository.findAll();
+			}
 			
 			if(veiculo.getPlaca() != null) {
 				veiculorepository.findByPlaca(veiculo.getPlaca()).forEach(veiculos::add);
@@ -105,11 +111,15 @@ public class VeiculoController {
 				veiculorepository.findByMarca(veiculo.getMarca()).forEach(veiculos::add);
 			}
 			
+			
+			
 			if(veiculos.isEmpty()) {
 				return new ResponseEntity<>(HttpStatus.OK);
+			} else {
+				veiculosFormatted = veiculos.stream().distinct().collect(Collectors.toList());
 			}
 			
-			return new ResponseEntity<>(veiculos, HttpStatus.OK);
+			return new ResponseEntity<>(veiculosFormatted, HttpStatus.OK);
 			
 		} catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);

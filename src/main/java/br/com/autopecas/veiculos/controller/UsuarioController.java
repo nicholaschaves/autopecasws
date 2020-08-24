@@ -3,6 +3,7 @@ package br.com.autopecas.veiculos.controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,8 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.autopecas.veiculos.enuns.ECargoTipo;
 import br.com.autopecas.veiculos.model.Usuario;
+import br.com.autopecas.veiculos.repository.UsuarioRepositoryCustom;
 import br.com.autopecas.veiculos.repository.UsuarioRepository;
-import br.com.autopecas.veiculos.repository.UsuarioRepositoryImpl;
 
 @RestController
 @RequestMapping(value = "/usuario")
@@ -27,9 +28,6 @@ public class UsuarioController {
 
 	@Autowired
 	UsuarioRepository usuarioRepository;
-	
-	@Autowired
-	UsuarioRepositoryImpl usuarioRepoImpl;
 
 	@GetMapping("/listar")
 	public ResponseEntity<List<Usuario>> listarUsuarios() {
@@ -65,11 +63,11 @@ public class UsuarioController {
 	@GetMapping("/listarPorId/{id}")
 	public ResponseEntity<Usuario> consultarPorId(@PathVariable(value = "id") long id) {
 
-		Optional<Usuario> usuario = usuarioRepository.findById(id);
+		Usuario usuario = usuarioRepository.getOne(id);
 
 		try {
-			if (usuario.isPresent()) {
-				Usuario _usuario = usuario.get();
+			if (usuario != null) {
+				Usuario _usuario = usuario;
 				return new ResponseEntity<>(_usuario, HttpStatus.OK);
 			} else {
 				return new ResponseEntity<>(HttpStatus.OK);
@@ -118,41 +116,96 @@ public class UsuarioController {
 
 	}
 
-	@PostMapping("/find")
-	public ResponseEntity<List<Usuario>> find(@RequestBody Usuario usuario) {
-		try {
+	@PostMapping("/autenticar")
+	public ResponseEntity<Usuario> autenticar(@RequestBody Usuario usuario) {
 
-			List<Usuario> lista = new ArrayList<Usuario>();
+		if (usuario != null) {
+			if (usuario.getUsername() != null && usuario.getSenha() != null) {
 
-//			if (usuario.getCpf() != null) {
-//				Usuario _usuario = new Usuario();
-//
-//				_usuario = usuarioRepository.findByCpf(usuario.getCpf());
-//				lista.add(_usuario);
-//			}
-//
-//			if (usuario.getCargo() != null) {
-//				List<Usuario> listaTemp = new ArrayList<Usuario>();
-//
-//				listaTemp = usuarioRepository.findBySpecificCargo(usuario.getCargo());
-//				listaTemp.forEach(lista::add);
-//			}
-//
-//			if (usuario.getNome() != null) {
-//				List<Usuario> listaTemp2 = new ArrayList<Usuario>();
-//
-//				listaTemp2 = usuarioRepository.findBySpecificName(usuario.getNome());
-//				listaTemp2.forEach(lista::add);
-//			}
-			
-			lista = usuarioRepoImpl.findByFiltro(usuario);
-			
+				try {
 
-			return new ResponseEntity<>(lista, HttpStatus.CREATED);
+					Usuario usuarioAutenticado = new Usuario();
 
-		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+					usuarioAutenticado = usuarioRepository.autenticarUsuario(usuario.getUsername(), usuario.getSenha());
+
+					if (usuarioAutenticado != null) {
+						return new ResponseEntity<>(usuarioAutenticado, HttpStatus.OK);
+					} else {
+						usuario.setUsername(null);
+						usuario.setSenha(null);
+						return new ResponseEntity<>(usuario, HttpStatus.BAD_REQUEST);
+					}
+
+				} catch (Exception e) {
+					return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+				}
+
+			} else {
+				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			}
+		} else {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
+
+	}
+
+	@PostMapping("/resetSenha")
+	public ResponseEntity<Usuario> resetSenha(@RequestBody Usuario usuario) {
+
+		if (usuario != null) {
+			if (usuario.getUsername() != null && usuario.getCpf() != null) {
+
+				try {
+
+					Usuario usuarioTemp = new Usuario();
+
+					usuarioTemp = usuarioRepository.resetUsuario(usuario.getUsername(), usuario.getCpf());
+
+					if (usuarioTemp != null) {
+
+						Optional<Usuario> usuarioData = usuarioRepository.findById(usuarioTemp.getId());
+
+						if (usuarioData.isPresent()) {
+							Usuario _usuario = usuarioData.get();
+							_usuario.setUsername(usuario.getUsername());
+							_usuario.setSenha("123456");
+							return new ResponseEntity<>(usuarioRepository.save(_usuario), HttpStatus.OK);
+						} else {
+							return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+						}
+
+					} else {
+						usuario.setUsername(null);
+						usuario.setSenha(null);
+						return new ResponseEntity<>(usuario, HttpStatus.BAD_REQUEST);
+					}
+
+				} catch (Exception e) {
+					return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+				}
+
+			} else {
+				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			}
+		} else {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
+
+	}
+
+	@PostMapping("/findByFiltro")
+	public ResponseEntity<List<Usuario>> findUsersByFiltro(@RequestBody Usuario usuario) {
+
+		List<Usuario> lista = new ArrayList<Usuario>();
+
+		lista = usuarioRepository.findUsersByFiltro(usuario);
+
+		if (lista.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		} else {
+			return new ResponseEntity<>(lista, HttpStatus.OK);
+		}
+
 	}
 
 }
