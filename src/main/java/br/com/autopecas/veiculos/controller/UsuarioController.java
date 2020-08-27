@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,8 +53,22 @@ public class UsuarioController {
 	public ResponseEntity<Usuario> criarUsuario(@RequestBody Usuario usuario) {
 		try {
 
-			Usuario _usuario = usuarioRepository.save(usuario);
-			return new ResponseEntity<>(_usuario, HttpStatus.CREATED);
+			if (usuario.getUsername() != null && usuario.getCpf() != null) {
+				Usuario usuarioExistente = new Usuario();
+
+				usuarioExistente = usuarioRepository.getUserByUsernameAndCpf(usuario.getUsername().trim().toLowerCase(), usuario.getCpf().trim());
+
+				if (usuarioExistente == null) {
+					usuario.setSenha(DigestUtils.sha256Hex(usuario.getSenha()));
+
+					Usuario _usuario = usuarioRepository.save(usuario);
+					return new ResponseEntity<>(_usuario, HttpStatus.CREATED);
+				} else {
+					return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+				}
+			} else {
+				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			}
 
 		} catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -126,6 +141,8 @@ public class UsuarioController {
 
 					Usuario usuarioAutenticado = new Usuario();
 
+					usuario.setSenha(DigestUtils.sha256Hex(usuario.getSenha()));
+
 					usuarioAutenticado = usuarioRepository.autenticarUsuario(usuario.getUsername(), usuario.getSenha());
 
 					if (usuarioAutenticado != null) {
@@ -159,24 +176,16 @@ public class UsuarioController {
 
 					Usuario usuarioTemp = new Usuario();
 
-					usuarioTemp = usuarioRepository.resetUsuario(usuario.getUsername(), usuario.getCpf());
+					usuarioTemp = usuarioRepository.getUserByUsernameAndCpf(usuario.getUsername().trim().toLowerCase(), usuario.getCpf().trim());
 
 					if (usuarioTemp != null) {
 
-						Optional<Usuario> usuarioData = usuarioRepository.findById(usuarioTemp.getId());
-
-						if (usuarioData.isPresent()) {
-							Usuario _usuario = usuarioData.get();
-							_usuario.setUsername(usuario.getUsername());
-							_usuario.setSenha("123456");
-							return new ResponseEntity<>(usuarioRepository.save(_usuario), HttpStatus.OK);
-						} else {
-							return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-						}
+						usuarioTemp.setSenha(DigestUtils.sha256Hex("123456"));
+//							_usuario.setSenha("123456");
+						return new ResponseEntity<>(usuarioRepository.save(usuarioTemp), HttpStatus.OK);
 
 					} else {
-						usuario.setUsername(null);
-						usuario.setSenha(null);
+						usuario = null;
 						return new ResponseEntity<>(usuario, HttpStatus.BAD_REQUEST);
 					}
 

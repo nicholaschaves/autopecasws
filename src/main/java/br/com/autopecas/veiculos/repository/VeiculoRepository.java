@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import br.com.autopecas.veiculos.model.Veiculo;
 
-public interface VeiculoRepository extends MongoRepository<Veiculo, String> {
+public interface VeiculoRepository extends MongoRepository<Veiculo, String>, VeiculoRepositoryCustom {
 	
 	 List<Veiculo> findByPlaca(String placa);
 	 List<Veiculo> findByModelo(String modelo);

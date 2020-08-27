@@ -22,6 +22,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long>, Usuario
 	public Usuario autenticarUsuario(String username, String senha);
 
 	@Query("FROM Usuario WHERE username = ?1 AND cpf = ?2")
-	public Usuario resetUsuario(String username, String cpf);
+	public Usuario getUserByUsernameAndCpf(String username, String cpf);
 
 }

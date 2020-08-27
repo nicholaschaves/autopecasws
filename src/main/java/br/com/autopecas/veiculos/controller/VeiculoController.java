@@ -126,4 +126,23 @@ public class VeiculoController {
 		}
 	}
 	
+	@PostMapping("/findByFiltro")
+	public ResponseEntity<List<Veiculo>> findByFiltro(@RequestBody Veiculo veiculo){
+		try {
+			
+			List<Veiculo> veiculos = new ArrayList<Veiculo>();
+			
+			veiculos = veiculorepository.findByFiltro(veiculo);
+			
+			if(veiculos.isEmpty()) {
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			} else {
+				return new ResponseEntity<>(veiculos, HttpStatus.OK);
+			}
+			
+		} catch (Exception e) {
+			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
 }

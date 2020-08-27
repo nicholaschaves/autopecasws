@@ -49,6 +49,8 @@ public class UsuarioRepositoryCustomImpl implements UsuarioRepositoryCustom {
 				sb.append("%'");
 			}
 		}
+		
+		sb.append(" ORDER BY id ASC");
 
 		return entityManager.createQuery(sb.toString(), Usuario.class).getResultList();
 		
